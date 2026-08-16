@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GestiClasse — Espace Élève</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0d0f14; --surface:#161920; --surface2:#1e2230; --border:#2a2f40;
+    --accent:#4f8ef7; --accent2:#7c5cfc; --green:#22d08a; --red:#f75f5f;
+    --yellow:#f7c04a; --text:#e8ecf5; --muted:#6b7494;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:'Sora',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+  }
+
+  /* ── ÉCRANS ───────────────────────────────── */
+  .screen { display:none; min-height:100vh; }
+  .screen.active { display:flex; flex-direction:column; }
+
+  /* ── LOGIN ────────────────────────────────── */
+  #screen-login {
+    align-items:center; justify-content:center;
+    background:
+      radial-gradient(ellipse at 25% 40%, #1a1060 0%, transparent 55%),
+      radial-gradient(ellipse at 75% 10%, #0a2a5e 0%, transparent 50%),
+      var(--bg);
+  }
+  .login-card {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:22px;
+    padding:40px 36px;
+    width:100%; max-width:400px;
+    margin:20px;
+    position:relative; overflow:hidden;
+  }
+  .login-card::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, var(--accent), var(--accent2), var(--green));
+  }
+  .login-logo {
+    font-size:2rem; font-weight:800;
+    background:linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    margin-bottom:4px;
+  }
+  .login-sub { color:var(--muted); font-size:.84rem; margin-bottom:28px; }
+  .field { margin-bottom:16px; }
+  .field label {
+    display:block; color:var(--muted); font-size:.74rem; font-weight:600;
+    letter-spacing:.05em; text-transform:uppercase; margin-bottom:6px;
+  }
+  .field input, .field select {
+    width:100%; padding:11px 14px;
+    background:var(--bg); border:1px solid var(--border); border-radius:10px;
+    color:var(--text); font-family:'Sora',sans-serif; font-size:.92rem;
+    outline:none; transition:border-color .2s;
+  }
+  .field input:focus, .field select:focus { border-color:var(--accent); }
+  .btn-primary {
+    width:100%; padding:13px; border:none; border-radius:10px;
+    background:linear-gradient(135deg, var(--accent), var(--accent2));
+    color:#fff; font-family:'Sora',sans-serif; font-size:.95rem;
+    font-weight:600; cursor:pointer; transition:opacity .2s;
+  }
+  .btn-primary:hover { opacity:.88; }
+  .err { color:var(--red); font-size:.82rem; margin-top:10px; text-align:center; }
+
+  /* ── PROFIL ───────────────────────────────── */
+  #screen-profil {
+    align-items:center; justify-content:flex-start;
+    padding:24px 16px 40px;
+    background:
+      radial-gradient(ellipse at 80% 0%, #0a1a40 0%, transparent 55%),
+      var(--bg);
+    overflow-y:auto;
+  }
+  .profil-card {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:22px;
+    padding:32px 28px;
+    width:100%; max-width:500px;
+    position:relative; overflow:hidden;
+  }
+  .profil-card::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, var(--accent), var(--accent2), var(--green));
+  }
+
+  /* Avatar */
+  .avatar-wrap { display:flex; align-items:flex-end; gap:12px; margin-bottom:18px; }
+  .avatar {
+    width:72px; height:72px; border-radius:50%; flex-shrink:0;
+    background:linear-gradient(135deg, var(--accent), var(--accent2));
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.8rem; font-weight:800; overflow:hidden;
+    border:2px solid var(--border);
+    cursor:pointer; position:relative; transition:border-color .2s;
+  }
+  .avatar:hover { border-color:var(--accent); }
+  .avatar img { width:100%; height:100%; object-fit:cover; }
+  .avatar-hint {
+    font-size:.72rem; color:var(--muted);
+    line-height:1.4; padding-bottom:4px;
+  }
+  .avatar-hint span { color:var(--accent); font-weight:600; }
+
+  /* Nom / classe */
+  .profil-name { font-size:1.45rem; font-weight:800; margin-bottom:3px; }
+  .profil-classe { color:var(--muted); font-size:.86rem; margin-bottom:20px; }
+
+  /* Infos grid */
+  .info-grid {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:10px; margin-bottom:20px;
+  }
+  .info-box {
+    background:var(--bg); border-radius:10px; padding:11px 13px;
+  }
+  .info-box .lbl {
+    color:var(--muted); font-size:.68rem; text-transform:uppercase;
+    letter-spacing:.05em; margin-bottom:3px;
+  }
+  .info-box .val {
+    font-size:.9rem; font-weight:600;
+    font-family:'JetBrains Mono',monospace;
+  }
+
+  /* Score */
+  .score-block {
+    text-align:center; background:var(--bg);
+    border-radius:14px; padding:22px 16px; margin-bottom:18px;
+  }
+  .score-num {
+    font-size:3.6rem; font-weight:800;
+    font-family:'JetBrains Mono',monospace; line-height:1; margin-bottom:4px;
+  }
+  .score-lbl { color:var(--muted); font-size:.8rem; }
+  .score-bar {
+    width:100%; height:7px; background:var(--surface2);
+    border-radius:4px; margin-top:12px; overflow:hidden;
+  }
+  .score-bar-fill {
+    height:100%; border-radius:4px;
+    transition:width .7s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* Messages de statut */
+  .status {
+    display:none; font-size:.78rem; text-align:center;
+    padding:8px 12px; border-radius:8px; margin-bottom:10px;
+  }
+  .status.pending {
+    background:rgba(247,192,74,.1); color:var(--yellow);
+    border:1px solid rgba(247,192,74,.2); display:block;
+  }
+  .status.ok {
+    background:rgba(34,208,138,.1); color:var(--green);
+    border:1px solid rgba(34,208,138,.2); display:block;
+  }
+  .status.err {
+    background:rgba(247,95,95,.1); color:var(--red);
+    border:1px solid rgba(247,95,95,.2); display:block;
+  }
+
+  /* Boutons d'action */
+  .action-btn {
+    width:100%; padding:11px 14px; border-radius:10px;
+    background:transparent; border:1px solid var(--border);
+    color:var(--text); font-family:'Sora',sans-serif;
+    font-size:.86rem; font-weight:600; cursor:pointer;
+    transition:all .2s; margin-bottom:8px; text-align:left;
+  }
+  .action-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .logout-btn {
+    width:100%; padding:11px; border-radius:10px;
+    background:rgba(247,95,95,.08); border:1px solid rgba(247,95,95,.2);
+    color:var(--red); font-family:'Sora',sans-serif;
+    font-size:.86rem; font-weight:600; cursor:pointer;
+    transition:all .2s; margin-top:4px;
+  }
+  .logout-btn:hover { background:rgba(247,95,95,.16); }
+
+  /* Remarques */
+  .section-lbl {
+    color:var(--muted); font-size:.7rem; text-transform:uppercase;
+    letter-spacing:.06em; margin-bottom:8px;
+  }
+  .remark-item {
+    background:var(--bg); border-radius:8px; padding:10px 12px;
+    margin-bottom:7px; font-size:.82rem;
+    border-left:3px solid var(--accent2);
+  }
+  .remark-date { color:var(--muted); font-size:.7rem; margin-top:3px; }
+
+  /* Séparateur */
+  .sep { height:1px; background:var(--border); margin:18px 0; }
+
+  /* ── MODAL ────────────────────────────────── */
+  .modal-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,.75); backdrop-filter:blur(4px);
+    z-index:100; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:18px; padding:26px; width:100%; max-width:400px;
+  }
+  .modal h3 { font-size:1.05rem; font-weight:700; margin-bottom:8px; }
+  .modal p { color:var(--muted); font-size:.82rem; margin-bottom:14px; }
+  .modal-actions {
+    display:flex; gap:8px; justify-content:flex-end; margin-top:14px;
+  }
+  .btn-sm {
+    padding:8px 16px; border-radius:8px; font-size:.8rem;
+    font-weight:600; cursor:pointer; font-family:'Sora',sans-serif;
+    transition:all .2s;
+  }
+  .btn-outline {
+    background:transparent; border:1px solid var(--border); color:var(--text);
+  }
+  .btn-outline:hover { border-color:var(--accent); color:var(--accent); }
+  .btn-send {
+    background:linear-gradient(135deg, var(--accent), var(--accent2));
+    border:none; color:#fff;
+  }
+  .btn-send:hover { opacity:.88; }
+
+
+  /* ── POP-UP PHOTO ─────────────────────────────────────── */
+  .popup-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,.85); backdrop-filter:blur(6px);
+    z-index:200; align-items:center; justify-content:center; padding:20px;
+  }
+  .popup-overlay.open { display:flex; }
+  .popup-box {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:20px; padding:30px 24px; max-width:360px; width:100%;
+    text-align:center; position:relative;
+  }
+  .popup-box::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2),var(--yellow));
+    border-radius:20px 20px 0 0;
+  }
+  .popup-icon { font-size:3rem; margin-bottom:12px; }
+  .popup-box h3 { font-size:1.1rem; font-weight:700; margin-bottom:8px; }
+  .popup-box p { color:var(--muted); font-size:.84rem; line-height:1.5; margin-bottom:20px; }
+  .popup-actions { display:flex; flex-direction:column; gap:8px; }
+  .popup-btn-main {
+    padding:12px; border:none; border-radius:10px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff; font-family:'Sora',sans-serif; font-size:.9rem;
+    font-weight:600; cursor:pointer; transition:opacity .2s;
+  }
+  .popup-btn-main:hover { opacity:.88; }
+  .popup-btn-skip {
+    padding:10px; border:1px solid var(--border); border-radius:10px;
+    background:transparent; color:var(--muted); font-family:'Sora',sans-serif;
+    font-size:.82rem; cursor:pointer; transition:all .2s;
+  }
+  .popup-btn-skip:hover { border-color:var(--muted); color:var(--text); }
+
+  ::-webkit-scrollbar { width:5px; }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+  @media(max-width:480px) {
+    .info-grid { grid-template-columns:1fr; }
+    .profil-card { padding:24px 18px; }
+    .login-card { padding:32px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="screen-login" class="screen active">
+  <div class="login-card">
+    <div class="login-logo">GestiClasse</div>
+    <div class="login-sub">🎓 Espace Élève</div>
+
+    <div class="field">
+      <label>Numéro Massar</label>
+      <input type="text" id="s-massar" placeholder="ex : D123456789"
+        onkeydown="if(event.key==='Enter')login()">
+    </div>
+    <div class="field">
+      <label>Date de naissance</label>
+      <input type="date" id="s-dob"
+        onkeydown="if(event.key==='Enter')login()">
+    </div>
+
+    <button class="btn-primary" onclick="login()">Se connecter</button>
+    <div class="err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ══════════════ PROFIL ══════════════ -->
+<div id="screen-profil" class="screen">
+  <div class="profil-card">
+
+    <!-- Avatar cliquable pour changer la photo -->
+    <div class="avatar-wrap">
+      <div class="avatar" id="avatar" onclick="document.getElementById('photo-input').click()"
+        title="Cliquer pour changer la photo">
+        ?
+      </div>
+      <div class="avatar-hint">
+        Cliquez sur la photo<br>
+        pour en proposer une nouvelle.<br>
+        <span>Validation requise par l'enseignant.</span>
+      </div>
+    </div>
+    <input type="file" id="photo-input" accept="image/*"
+      style="display:none" onchange="soumettrePhoto(event)">
+
+    <!-- Statut photo -->
+    <div class="status" id="status-photo"></div>
+
+    <!-- Nom & classe -->
+    <div class="profil-name" id="p-name"></div>
+    <div class="profil-classe" id="p-classe"></div>
+
+    <!-- Infos -->
+    <div class="info-grid">
+      <div class="info-box">
+        <div class="lbl">N° Massar</div>
+        <div class="val" id="p-massar"></div>
+      </div>
+      <div class="info-box">
+        <div class="lbl">N° en classe</div>
+        <div class="val" id="p-num"></div>
+      </div>
+      <div class="info-box">
+        <div class="lbl">Date de naissance</div>
+        <div class="val" id="p-dob"></div>
+      </div>
+      <div class="info-box">
+        <div class="lbl">Classe</div>
+        <div class="val" id="p-classenom"></div>
+      </div>
+    </div>
+
+    <!-- Score comportement -->
+    <div class="score-block">
+      <div class="score-num" id="p-score">20</div>
+      <div class="score-lbl">Points de comportement / 20</div>
+      <div class="score-bar">
+        <div class="score-bar-fill" id="p-bar"></div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Actions élève -->
+    <div class="section-lbl">Mes demandes</div>
+
+    <!-- Statut changement de classe -->
+    <div class="status" id="status-classe"></div>
+
+    <button class="action-btn" onclick="ouvrirDemandeClasse()">
+      📋 Demander un changement de classe
+    </button>
+
+    <div class="sep"></div>
+
+    <!-- Remarques enseignant -->
+    <div class="section-lbl">📝 Remarques de l'enseignant</div>
+    <div id="p-remarques"></div>
+
+    <div class="sep"></div>
+
+    <!-- Déconnexion -->
+    <button class="logout-btn" onclick="logout()">← Déconnexion</button>
+  </div>
+</div>
+
+<!-- ══ MODAL : CHANGEMENT DE CLASSE ══ -->
+<div class="modal-overlay" id="modal-classe">
+  <div class="modal">
+    <h3>📋 Demander un changement de classe</h3>
+    <p>Votre demande sera examinée par l'enseignant avant d'être appliquée.</p>
+    <div class="field">
+      <label>Nouvelle classe souhaitée</label>
+      <select id="select-classe">
+        <option value="">-- Sélectionner --</option>
+        <option>TCF1</option>
+        <option>TCF2</option>
+        <option>TCF3</option>
+        <option>TCF4</option>
+        <option>TCF5</option>
+        <option>TCF6</option>
+        <option>TCLSH1</option>
+        <option>TCLSH2</option>
+        <option>TCLSH3</option>
+      </select>
+    </div>
+    <div class="err" id="classe-err"></div>
+    <div class="modal-actions">
+      <button class="btn-sm btn-outline"
+        onclick="fermerModal()">Annuler</button>
+      <button class="btn-sm btn-send"
+        onclick="envoyerDemandeClasse()">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL : CONFIRMATION PHOTO ══ -->
+<div class="modal-overlay" id="modal-photo-confirm">
+  <div class="modal">
+    <h3>📷 Changer ma photo</h3>
+    <p>Votre nouvelle photo sera envoyée à l'enseignant pour validation
+      avant d'être affichée sur votre profil.</p>
+    <div style="text-align:center;margin:14px 0;">
+      <img id="photo-preview" src=""
+        style="width:90px;height:90px;object-fit:cover;border-radius:50%;
+          border:2px solid var(--yellow);">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm btn-outline"
+        onclick="fermerModal()">Annuler</button>
+      <button class="btn-sm btn-send"
+        onclick="confirmerPhoto()">Envoyer la photo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// DONNÉES GLOBALES
+// ═══════════════════════════════════════════════
+let eleveData    = null;   // données de l'élève connecté
+let photoPending = null;   // photo en base64 en attente de confirmation
+
+// ═══════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════
+async function api(method, url, body) {
+  const opts = {
+    method, credentials:'include',
+    headers:{ 'Content-Type':'application/json' }
+  };
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  try {
+    const r = await fetch(url, opts);
+    return await r.json();
+  } catch(e) {
+    return { error:'Erreur réseau : ' + e.message };
+  }
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen')
+    .forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function fermerModal() {
+  document.querySelectorAll('.modal-overlay')
+    .forEach(m => m.classList.remove('open'));
+}
+
+function ouvrirModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+
+function afficherStatus(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = 'status ' + type;
+  el.textContent = msg;
+}
+
+function cacherStatus(id) {
+  document.getElementById(id).className = 'status';
+  document.getElementById(id).textContent = '';
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  try {
+    return new Date(d).toLocaleDateString('fr-FR',
+      { day:'2-digit', month:'long', year:'numeric' });
+  } catch { return d; }
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Fermer modal en cliquant le fond
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => {
+    if (e.target === o) fermerModal();
+  });
+});
+
+// ═══════════════════════════════════════════════
+// CONNEXION / DÉCONNEXION
+// ═══════════════════════════════════════════════
+async function login() {
+  const massar = document.getElementById('s-massar').value.trim().toUpperCase();
+  const dob    = document.getElementById('s-dob').value;
+  const errEl  = document.getElementById('login-err');
+
+  if (!massar || !dob) {
+    errEl.textContent = 'Veuillez remplir tous les champs.';
+    return;
+  }
+
+  errEl.textContent = '';
+  const r = await api('POST', '/api/auth/login-eleve',
+    { massar, date_naissance: dob });
+
+  if (r.success) {
+    eleveData = r.eleve;
+    renderProfil(eleveData);
+    showScreen('screen-profil');
+  } else {
+    errEl.textContent = r.error || 'Identifiants incorrects.';
+  }
+}
+
+function logout() {
+  eleveData = null;
+  photoPending = null;
+  // Réinitialiser les champs
+  document.getElementById('s-massar').value = '';
+  document.getElementById('s-dob').value    = '';
+  document.getElementById('login-err').textContent = '';
+  showScreen('screen-login');
+}
+
+// ═══════════════════════════════════════════════
+// AFFICHAGE DU PROFIL
+// ═══════════════════════════════════════════════
+function renderProfil(e) {
+  // Avatar
+  const av   = document.getElementById('avatar');
+  const init = ((e.prenom||'')[0]||'').toUpperCase()
+             + ((e.nom||'')[0]||'').toUpperCase();
+
+  av.dataset.eleveId = e.id;  // stocker l'id sur l'élément
+
+  if (e.photo) {
+    av.innerHTML = `<img src="${e.photo}"
+      style="width:100%;height:100%;object-fit:cover;">`;
+  } else {
+    av.textContent = init || '?';
+  }
+
+  // Nom & classe
+  document.getElementById('p-name').textContent =
+    (e.prenom || '') + ' ' + (e.nom || '');
+  document.getElementById('p-classe').textContent =
+    `Classe ${e.classe_nom} — N° ${e.numero_classe}`;
+
+  // Infos
+  document.getElementById('p-massar').textContent    = e.massar    || '—';
+  document.getElementById('p-num').textContent       = e.numero_classe || '—';
+  document.getElementById('p-dob').textContent       = fmtDate(e.date_naissance);
+  document.getElementById('p-classenom').textContent = e.classe_nom || '—';
+
+  // Score
+  const pts = parseFloat(e.points) || 0;
+  const pct = Math.max(0, Math.min(100, (pts / 20) * 100));
+  const scoreEl = document.getElementById('p-score');
+  scoreEl.textContent = pts % 1 === 0 ? pts : pts.toFixed(2);
+  scoreEl.style.color = pts >= 16 ? 'var(--green)'
+                      : pts >= 10 ? 'var(--yellow)'
+                      : 'var(--red)';
+  const bar = document.getElementById('p-bar');
+  bar.style.width      = pct + '%';
+  bar.style.background = pts >= 16 ? 'var(--green)'
+                       : pts >= 10 ? 'var(--yellow)'
+                       : 'var(--red)';
+
+  // Remarques
+  const remDiv  = document.getElementById('p-remarques');
+  const remarks = e.remarques || [];
+  if (!remarks.length) {
+    remDiv.innerHTML =
+      `<p style="color:var(--muted);font-size:.82rem;font-style:italic;">
+        Aucune remarque pour le moment.</p>`;
+  } else {
+    remDiv.innerHTML = remarks.map(r => `
+      <div class="remark-item">
+        ${esc(r.texte)}
+        <div class="remark-date">${fmtDate(r.created_at)}</div>
+      </div>`).join('');
+  }
+
+  // Cacher les statuts précédents
+  cacherStatus('status-photo');
+  cacherStatus('status-classe');
+
+  // Pop-up photo si pas encore de photo
+  afficherPopupPhotoSiNecessaire(e);
+}
+
+// ═══════════════════════════════════════════════
+// CHANGEMENT DE PHOTO
+// ═══════════════════════════════════════════════
+function soumettrePhoto(event) {
+  const file = event.target.files[0];
+  // Réinitialiser l'input pour permettre de re-sélectionner le même fichier
+  event.target.value = '';
+
+  if (!file) return;
+
+  // Vérification taille (2 Mo max)
+  if (file.size > 2 * 1024 * 1024) {
+    afficherStatus('status-photo', 'err',
+      '❌ Image trop grande. Maximum 2 Mo.');
+    return;
+  }
+
+  // Vérification type
+  if (!file.type.startsWith('image/')) {
+    afficherStatus('status-photo', 'err',
+      '❌ Fichier non valide. Sélectionnez une image.');
+    return;
+  }
+
+  // Lire et afficher la prévisualisation
+  const reader = new FileReader();
+  reader.onerror = () => {
+    afficherStatus('status-photo', 'err', '❌ Impossible de lire le fichier.');
+  };
+  reader.onload = (e) => {
+    photoPending = e.target.result;
+    document.getElementById('photo-preview').src = photoPending;
+    ouvrirModal('modal-photo-confirm');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function confirmerPhoto() {
+  if (!photoPending) return;
+
+  fermerModal();
+  afficherStatus('status-photo', 'pending', '⏳ Envoi en cours...');
+
+  const eleve_id = document.getElementById('avatar').dataset.eleveId
+                || eleveData?.id;
+
+  if (!eleve_id) {
+    afficherStatus('status-photo', 'err',
+      '❌ Erreur : identifiant introuvable. Reconnectez-vous.');
+    return;
+  }
+
+  const r = await api('POST', '/api/photos/submit', {
+    eleve_id,
+    photo_data: photoPending
+  });
+
+  photoPending = null;
+
+  if (r.success) {
+    afficherStatus('status-photo', 'pending',
+      '⏳ Photo envoyée — en attente de validation par l\'enseignant.');
+  } else {
+    afficherStatus('status-photo', 'err', '❌ ' + (r.error || 'Erreur envoi.'));
+  }
+}
+
+// ═══════════════════════════════════════════════
+// CHANGEMENT DE CLASSE
+// ═══════════════════════════════════════════════
+function ouvrirDemandeClasse() {
+  document.getElementById('classe-err').textContent = '';
+  document.getElementById('select-classe').value    = '';
+  ouvrirModal('modal-classe');
+}
+
+async function envoyerDemandeClasse() {
+  const nouvelle_val = document.getElementById('select-classe').value;
+  const errEl        = document.getElementById('classe-err');
+
+  if (!nouvelle_val) {
+    errEl.textContent = 'Veuillez sélectionner une classe.';
+    return;
+  }
+
+  const eleve_id = document.getElementById('avatar').dataset.eleveId
+                || eleveData?.id;
+
+  if (!eleve_id) {
+    errEl.textContent = 'Erreur : identifiant introuvable. Reconnectez-vous.';
+    return;
+  }
+
+  const r = await api('POST', '/api/modifications/submit', {
+    eleve_id,
+    champ:       'classe_id',
+    nouvelle_val
+  });
+
+  fermerModal();
+
+  if (r.success) {
+    afficherStatus('status-classe', 'pending',
+      `⏳ Demande de passage en ${nouvelle_val} envoyée — en attente de validation.`);
+  } else {
+    afficherStatus('status-classe', 'err',
+      '❌ ' + (r.error || 'Erreur envoi.'));
+  }
+}
+
+// ═══════════════════════════════════════════════
+// CONNEXION AUTOMATIQUE VIA TOKEN (/acces/:token)
+// ═══════════════════════════════════════════════
+// Si l'élève arrive avec ?connecte=1 dans l'URL,
+// on récupère ses données depuis la session serveur
+(async () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('connecte') === '1') {
+    // Récupérer le profil depuis la session active
+    const r = await api('GET', '/api/auth/session-eleve');
+    if (r.success && r.eleve) {
+      eleveData = r.eleve;
+      renderProfil(eleveData);
+      showScreen('screen-profil');
+      // Nettoyer l'URL
+      window.history.replaceState({}, '', '/eleve');
+    }
+  } else if (params.get('erreur')) {
+    document.getElementById('login-err').textContent =
+      params.get('erreur') === 'lien_invalide'
+        ? 'Lien de connexion invalide ou expiré.'
+        : 'Erreur de connexion. Veuillez réessayer.';
+    window.history.replaceState({}, '', '/eleve');
+  }
+})();
+
+// ═══════════════════════════════════════════════════════════
+// POP-UP PHOTO AU PREMIER CHARGEMENT
+// ═══════════════════════════════════════════════════════════
+function afficherPopupPhotoSiNecessaire(eleve) {
+  // Afficher seulement si l'élève n'a pas encore de photo
+  if (eleve.photo) return;
+
+  // Vérifier si déjà montré dans cette session
+  const cle = `photo_popup_${eleve.id}`;
+  if (sessionStorage.getItem(cle)) return;
+
+  // Délai de 1.5s pour laisser le profil s'afficher
+  setTimeout(() => {
+    document.getElementById('popup-photo').classList.add('open');
+  }, 1500);
+}
+
+function fermerPopupPhoto(ouvrirInput) {
+  const cle = `photo_popup_${eleveData?.id}`;
+  sessionStorage.setItem(cle, '1');
+  document.getElementById('popup-photo').classList.remove('open');
+  if (ouvrirInput) {
+    setTimeout(() => {
+      document.getElementById('photo-input').click();
+    }, 300);
+  }
+}
+
+</script>
+
+<!-- ══ POP-UP : AJOUTER UNE PHOTO ══ -->
+<div class="popup-overlay" id="popup-photo">
+  <div class="popup-box">
+    <div class="popup-icon">📸</div>
+    <h3>Personnalisez votre profil !</h3>
+    <p>
+      Ajoutez une photo de profil pour que votre enseignant
+      puisse vous reconnaître facilement.<br><br>
+      <strong style="color:var(--accent);">Votre photo sera validée
+      par l'enseignant avant d'être affichée.</strong>
+    </p>
+    <div class="popup-actions">
+      <button class="popup-btn-main"
+        onclick="fermerPopupPhoto(true)">
+        📷 Ajouter ma photo maintenant
+      </button>
+      <button class="popup-btn-skip"
+        onclick="fermerPopupPhoto(false)">
+        Plus tard
+      </button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

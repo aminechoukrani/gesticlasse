@@ -1,0 +1,2095 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GestiClasse — Dashboard</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0f14;
+      --surface: #161920;
+      --surface2: #1e2230;
+      --border: #2a2f40;
+      --accent: #4f8ef7;
+      --accent2: #7c5cfc;
+      --green: #22d08a;
+      --red: #f75f5f;
+      --yellow: #f7c04a;
+      --text: #e8ecf5;
+      --muted: #6b7494;
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .screen {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* LOGIN */
+    #screen-login {
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at 20% 50%, #1a1060 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, #0a2a5e 0%, transparent 50%), var(--bg);
+    }
+
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+      margin: 20px;
+    }
+
+    .form-card .logo {
+      font-size: 2.2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+    }
+
+    .form-card .sub {
+      color: var(--muted);
+      font-size: .85rem;
+      margin-bottom: 28px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      color: var(--muted);
+      font-size: .78rem;
+      margin-bottom: 6px;
+      font-weight: 600;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-family: 'Sora', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+
+    .btn-login:hover {
+      opacity: .88;
+    }
+
+    .error-msg {
+      color: var(--red);
+      font-size: .85rem;
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    .success-msg {
+      color: var(--green);
+      font-size: .85rem;
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    /* DASHBOARD */
+    #screen-dashboard {
+      background: var(--bg);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .brand {
+      font-weight: 800;
+      font-size: 1.1rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Sora', sans-serif;
+      transition: all .2s;
+      border: none;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-success {
+      background: rgba(34, 208, 138, .12);
+      border: 1px solid rgba(34, 208, 138, .3);
+      color: var(--green);
+    }
+
+    .btn-success:hover {
+      background: rgba(34, 208, 138, .22);
+    }
+
+    .btn-danger {
+      background: rgba(247, 95, 95, .12);
+      border: 1px solid rgba(247, 95, 95, .3);
+      color: var(--red);
+    }
+
+    .btn-danger:hover {
+      background: rgba(247, 95, 95, .22);
+    }
+
+    .btn-accent {
+      background: rgba(79, 142, 247, .12);
+      border: 1px solid rgba(79, 142, 247, .3);
+      color: var(--accent);
+    }
+
+    .btn-accent:hover {
+      background: rgba(79, 142, 247, .22);
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--red);
+      color: #fff;
+      border-radius: 10px;
+      padding: 1px 6px;
+      font-size: .68rem;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
+    .body-wrap {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 57px);
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 210px;
+      min-width: 210px;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+      overflow-y: auto;
+      padding: 14px 0;
+    }
+
+    .sidebar h3 {
+      color: var(--muted);
+      font-size: .68rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      padding: 0 14px 8px;
+    }
+
+    .class-item {
+      padding: 9px 14px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      font-size: .85rem;
+      transition: all .15s;
+    }
+
+    .class-item:hover {
+      background: var(--surface2);
+    }
+
+    .class-item.active {
+      border-left-color: var(--accent);
+      background: rgba(79, 142, 247, .07);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .class-count {
+      font-size: .72rem;
+      color: var(--muted);
+    }
+
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 22px 26px;
+    }
+
+    .stats-bar {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      flex: 1;
+      min-width: 120px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+    }
+
+    .stat-val {
+      font-size: 1.7rem;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .stat-lbl {
+      color: var(--muted);
+      font-size: .74rem;
+      margin-top: 2px;
+    }
+
+    .tbl-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .tbl-header h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .search-input {
+      padding: 8px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      font-size: .85rem;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      color: var(--muted);
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+    }
+
+    td {
+      padding: 11px 12px;
+      border-bottom: 1px solid rgba(42, 47, 64, .4);
+      font-size: .85rem;
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: var(--surface);
+    }
+
+    .score-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 40px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: .88rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .score-high {
+      background: rgba(34, 208, 138, .15);
+      color: var(--green);
+    }
+
+    .score-mid {
+      background: rgba(247, 192, 74, .15);
+      color: var(--yellow);
+    }
+
+    .score-low {
+      background: rgba(247, 95, 95, .15);
+      color: var(--red);
+    }
+
+    .pts-ctrl {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pts-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 700;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pts-add {
+      background: rgba(34, 208, 138, .15);
+      color: var(--green);
+    }
+
+    .pts-add:hover {
+      background: rgba(34, 208, 138, .3);
+    }
+
+    .pts-sub {
+      background: rgba(247, 95, 95, .15);
+      color: var(--red);
+    }
+
+    .pts-sub:hover {
+      background: rgba(247, 95, 95, .3);
+    }
+
+    .pts-input {
+      background: rgba(79, 142, 247, .08);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .82rem;
+      width: 46px;
+      padding: 3px 5px;
+      text-align: center;
+      outline: none;
+    }
+
+    .btn-tbl {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      padding: 3px 8px;
+      font-size: .72rem;
+      cursor: pointer;
+      font-family: 'Sora', sans-serif;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+
+    .btn-tbl:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    /* MODALS */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .72);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .modal-wide {
+      max-width: 640px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .modal textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      font-size: .88rem;
+      padding: 11px;
+      resize: vertical;
+      min-height: 90px;
+      outline: none;
+    }
+
+    .modal textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .import-area {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s;
+      margin-bottom: 14px;
+    }
+
+    .import-area:hover {
+      border-color: var(--accent);
+    }
+
+    .import-preview {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .74rem;
+      color: var(--muted);
+      max-height: 120px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+      white-space: pre;
+      display: none;
+    }
+
+    .csv-hint {
+      background: rgba(79, 142, 247, .07);
+      border: 1px solid rgba(79, 142, 247, .2);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: .76rem;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1.6;
+    }
+
+    .pending-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px;
+      background: var(--bg);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .avatar-sm {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1rem;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .avatar-sm img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* VUE CARTES */
+    .view-toggle {
+      display: flex;
+      gap: 6px;
+    }
+
+    .view-btn {
+      padding: 6px 12px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .8rem;
+      transition: all .2s;
+      font-family: 'Sora', sans-serif;
+    }
+
+    .view-btn.active {
+      background: rgba(79, 142, 247, .15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 130px);
+      gap: 10px;
+      padding: 4px;
+      align-content: flex-start;
+    }
+
+    .student-card {
+      width: 130px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 10px;
+      text-align: center;
+      cursor: grab;
+      transition: box-shadow .2s, transform .15s;
+      position: relative;
+      user-select: none;
+    }
+
+    .student-card:hover {
+      border-color: var(--accent2);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .3);
+    }
+
+    .student-card.dragging {
+      opacity: .5;
+      cursor: grabbing;
+      transform: scale(1.05);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, .5);
+    }
+
+    .student-card.drag-over {
+      border-color: var(--accent);
+      background: rgba(79, 142, 247, .08);
+    }
+
+    .card-avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      margin: 0 auto 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 800;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      cursor: pointer;
+      position: relative;
+      transition: border-color .2s;
+    }
+
+    .card-avatar:hover {
+      border-color: var(--yellow);
+    }
+
+    .card-avatar img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-avatar-zoom {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, .4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity .2s;
+      border-radius: 50%;
+      font-size: .9rem;
+    }
+
+    .card-avatar:hover .card-avatar-zoom {
+      opacity: 1;
+    }
+
+    .card-num {
+      position: absolute;
+      top: 7px;
+      left: 7px;
+      background: var(--bg);
+      border-radius: 5px;
+      font-size: .62rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+      padding: 2px 5px;
+    }
+
+    .card-name {
+      font-size: .72rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-prenom {
+      font-size: .68rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-score {
+      font-size: .85rem;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 6px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .card-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--muted);
+      padding: 2px 5px;
+      font-size: .62rem;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: 'Sora', sans-serif;
+    }
+
+    .card-btn:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    /* ZOOM PHOTO */
+    .zoom-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .9);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .zoom-overlay.open {
+      display: flex;
+    }
+
+    .zoom-overlay img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 16px;
+      object-fit: contain;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .8);
+    }
+
+    .zoom-name {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, .7);
+      color: #fff;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: .9rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .zoom-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      color: #fff;
+      font-size: 1.8rem;
+      cursor: pointer;
+      opacity: .7;
+    }
+
+    .zoom-close:hover {
+      opacity: 1;
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    @media(max-width:700px) {
+      .sidebar {
+        display: none;
+      }
+
+      .sidebar.open {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        width: 100%;
+        background: var(--surface);
+        padding: 20px 0;
+        overflow-y: auto;
+      }
+
+      .body-wrap {
+        height: auto;
+        overflow: visible;
+      }
+
+      .main {
+        overflow: visible;
+        padding: 14px;
+      }
+    }
+
+    .main {
+      padding: 14px;
+    }
+
+    .body-wrap {
+      height: auto;
+      overflow: visible;
+    }
+
+    .main {
+      overflow: visible;
+    }
+    }
+
+    @media(max-width:700px) {
+      #btn-menu-mobile {
+        display: inline-flex !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══ LOGIN ═══ -->
+  <div id="screen-login" class="screen active">
+    <div class="form-card">
+      <div class="logo">GestiClasse</div>
+      <div class="sub">🧑‍🏫 Espace Enseignant</div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="t-email" placeholder="prof@ecole.ma" value="prof@ecole.ma">
+      </div>
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" id="t-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()">
+      </div>
+      <button class="btn-login" onclick="login()">Se connecter</button>
+      <div class="error-msg" id="login-err"></div>
+    </div>
+  </div>
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div id="screen-dashboard" class="screen">
+    <div class="topbar">
+      <div class="brand">GestiClasse 🏫</div>
+      <button class="btn btn-outline" id="btn-menu-mobile" style="display:none;"
+        onclick="document.querySelector('.sidebar').classList.toggle('open')">
+        ☰ Classes
+      </button>
+      <div class="topbar-actions">
+        <input class="search-input" id="search-input" type="text" placeholder="🔍 Rechercher..."
+          oninput="loadStudents()" style="width:170px;">
+        <button class="btn btn-success" onclick="openImport()">📥 CSV</button>
+        <button class="btn btn-outline" onclick="exportCSV()">📤 Export</button>
+        <button class="btn btn-outline" onclick="openPhotos()">
+          📷 Photos<span class="badge" id="badge-photos" style="display:none;">0</span>
+        </button>
+        <button class="btn btn-outline" onclick="openModifs()">
+          ✏️ Modifs<span class="badge" id="badge-modifs" style="display:none;">0</span>
+        </button>
+        <button class="btn btn-outline" onclick="openLiens()">🔗 Liens</button>
+        <button class="btn btn-accent" onclick="openCahier()">📓 Cahier</button>
+        <button class="btn btn-outline" onclick="openPass()">🔑 MDP</button>
+        <button class="btn btn-danger" onclick="logout()">Déconnexion</button>
+      </div>
+    </div>
+    <div class="body-wrap">
+      <div class="sidebar">
+        <h3>Classes</h3>
+        <div id="classes-list"></div>
+      </div>
+      <div class="main">
+        <div class="stats-bar" id="stats-bar"></div>
+        <div class="tbl-header">
+          <h2 id="class-title">Toutes les classes</h2>
+          <div class="view-toggle">
+            <button class="view-btn active" id="btn-view-table" onclick="setView('table')">☰ Tableau</button>
+            <button class="view-btn" id="btn-view-cards" onclick="setView('cards')">⊞ Cartes</button>
+            <button class="view-btn" id="btn-add-gap" onclick="ajouterCaseVide()">＋ Case vide</button>
+          </div>
+        </div>
+        <div id="table-wrap">
+          <p style="color:var(--muted);text-align:center;padding:40px;">Chargement...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL : REMARQUE ═══ -->
+  <div class="modal-overlay" id="modal-remark">
+    <div class="modal" style="max-width:520px;">
+      <h3>📝 Remarques</h3>
+      <p style="color:var(--muted);font-size:.83rem;margin-bottom:12px;" id="remark-nom"></p>
+      <div id="remark-list" style="margin-bottom:14px;max-height:220px;overflow-y:auto;"></div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;">
+        <div style="color:var(--muted);font-size:.72rem;text-transform:uppercase;
+        letter-spacing:.05em;margin-bottom:6px;">Nouvelle remarque</div>
+        <textarea id="remark-text" placeholder="Saisir la remarque..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('modal-remark')">Fermer</button>
+        <button class="btn btn-success" onclick="saveRemark()">➕ Ajouter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL : ÉDITION ÉLÈVE ═══ -->
+  <div class="modal-overlay" id="modal-edit">
+    <div class="modal">
+      <h3>🖊️ Modifier le profil</h3>
+      <input type="hidden" id="edit-id">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;
+      padding:12px;background:var(--bg);border-radius:10px;">
+        <div id="edit-avatar" style="width:56px;height:56px;border-radius:50%;flex-shrink:0;
+          background:linear-gradient(135deg,var(--accent),var(--accent2));
+          display:flex;align-items:center;justify-content:center;
+          font-weight:700;font-size:1.1rem;overflow:hidden;cursor:pointer;
+          border:2px solid var(--border);position:relative;"
+          onclick="document.getElementById('edit-photo-input').click()" title="Cliquer pour changer la photo">?</div>
+        <div style="flex:1;">
+          <div style="font-size:.78rem;color:var(--muted);margin-bottom:6px;">Photo de profil</div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-outline" style="font-size:.74rem;padding:5px 10px;"
+              onclick="document.getElementById('edit-photo-input').click()">📷 Changer</button>
+            <button class="btn btn-danger" style="font-size:.74rem;padding:5px 10px;"
+              onclick="supprimerPhotoAdmin()">🗑️ Supprimer</button>
+          </div>
+        </div>
+      </div>
+      <input type="file" id="edit-photo-input" accept="image/*" style="display:none"
+        onchange="changerPhotoAdmin(event)">
+      <div class="form-group"><label>Nom</label><input type="text" id="edit-nom"></div>
+      <div class="form-group"><label>Prénom</label><input type="text" id="edit-prenom"></div>
+      <div class="form-group"><label>Classe</label>
+        <select id="edit-classe">
+          <option value="">-- Sélectionner --</option>
+          <option>TCF1</option>
+          <option>TCF2</option>
+          <option>TCF3</option>
+          <option>TCF4</option>
+          <option>TCF5</option>
+          <option>TCF6</option>
+          <option>TCLSH1</option>
+          <option>TCLSH2</option>
+          <option>TCLSH3</option>
+        </select>
+      </div>
+      <div class="form-group"><label>N° en classe</label><input type="number" id="edit-num" min="1"></div>
+      <div class="form-group"><label>N° Massar</label><input type="text" id="edit-massar"></div>
+      <div class="form-group"><label>Date de naissance</label><input type="date" id="edit-dob"></div>
+      <div class="error-msg" id="edit-err"></div>
+      <div class="success-msg" id="edit-ok"></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('modal-edit')">Annuler</button>
+        <button class="btn btn-success" onclick="saveEdit()">💾 Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL : IMPORT CSV ═══ -->
+  <div class="modal-overlay" id="modal-import">
+    <div class="modal">
+      <h3>📥 Importer des élèves (CSV)</h3>
+      <div class="import-area" onclick="document.getElementById('csv-file').click()">
+        <div style="font-size:2.2rem;margin-bottom:6px;">📄</div>
+        <p style="color:var(--muted);font-size:.85rem;">Cliquez pour sélectionner</p>
+        <p id="csv-filename" style="color:var(--accent);margin-top:4px;font-size:.83rem;"></p>
+      </div>
+      <input type="file" id="csv-file" accept=".csv" style="display:none" onchange="previewCSV(event)">
+      <div class="import-preview" id="import-preview"></div>
+      <div class="csv-hint">
+        nom;prenom;classe;numero_classe;massar;date_naissance<br>
+        AMRANI;Youssef;TCF1;1;D123456789;2008-05-14
+      </div>
+      <div class="error-msg" id="import-msg" style="margin-top:8px;"></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('modal-import')">Annuler</button>
+        <button class="btn btn-success" id="btn-import" onclick="doImport()" disabled>Importer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL : MOT DE PASSE ═══ -->
+  <div class="modal-overlay" id="modal-pass">
+    <div class="modal">
+      <h3>🔑 Changer le mot de passe</h3>
+      <div class="form-group"><label>Nouveau mot de passe</label>
+        <input type="password" id="new-pass1" placeholder="••••••••">
+      </div>
+      <div class="form-group"><label>Confirmer</label>
+        <input type="password" id="new-pass2" placeholder="••••••••">
+      </div>
+      <div class="error-msg" id="pass-err"></div>
+      <div class="success-msg" id="pass-ok"></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('modal-pass')">Fermer</button>
+        <button class="btn btn-success" onclick="savePass()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL : PHOTOS EN ATTENTE ═══ -->
+  <div class="modal-overlay" id="modal-photos">
+    <div class="modal modal-wide">
+      <h3>📷 Photos en attente de validation</h3>
+      <div id="photos-list" style="margin-top:14px;"></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('modal-photos')">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL : MODIFICATIONS EN ATTENTE ═══ -->
+  <div class="modal-overlay" id="modal-modifs">
+    <div class="modal modal-wide">
+      <h3>✏️ Demandes de modification en attente</h3>
+      <div id="modifs-list" style="margin-top:14px;"></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('modal-modifs')">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL : LIENS ÉLÈVES ═══ -->
+  <div class="modal-overlay" id="modal-liens">
+    <div class="modal modal-wide">
+      <h3>🔗 Liens de connexion élèves</h3>
+      <p style="color:var(--muted);font-size:.83rem;margin-bottom:14px;">
+        Chaque élève a un lien unique — il clique et arrive directement sur son profil.
+      </p>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+        <button class="btn btn-success" onclick="genererTokens()">⚡ Générer les liens</button>
+        <button class="btn btn-outline" onclick="exporterLiens()">📤 Exporter CSV</button>
+        <input class="search-input" id="search-lien" type="text" placeholder="Filtrer..." oninput="filtrerLiens()"
+          style="width:160px;">
+      </div>
+      <div id="liens-list" style="max-height:50vh;overflow-y:auto;"></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('modal-liens')">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL : CAHIER ═══ -->
+  <div class="modal-overlay" id="modal-cahier">
+    <div class="modal" style="max-width:520px;">
+      <h3>📓 Suivi du cahier</h3>
+      <p style="color:var(--muted);font-size:.83rem;margin-bottom:16px;" id="cahier-nom"></p>
+      <input type="hidden" id="cahier-eleve-id">
+      <div style="background:var(--bg);border-radius:12px;padding:16px;margin-bottom:14px;">
+        <div class="form-group">
+          <label>📅 Date de vérification</label>
+          <input type="date" id="cahier-date">
+        </div>
+        <div class="form-group">
+          <label>✅ Exercices faits</label>
+          <select id="cahier-exercices">
+            <option value="oui">✅ Oui — tous faits</option>
+            <option value="partiel">⚠️ Partiellement</option>
+            <option value="non">❌ Non faits</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>📄 Pages complètes</label>
+          <input type="number" id="cahier-pages" min="0" max="200" placeholder="ex: 24">
+        </div>
+        <div class="form-group">
+          <label>✨ Propreté / présentation</label>
+          <select id="cahier-proprete">
+            <option value="excellent">⭐⭐⭐ Excellent</option>
+            <option value="bien">⭐⭐ Bien</option>
+            <option value="moyen">⭐ Moyen</option>
+            <option value="insuffisant">❌ Insuffisant</option>
+          </select>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;">
+          <div style="color:var(--muted);font-size:.72rem;text-transform:uppercase;
+          letter-spacing:.05em;margin-bottom:8px;">Impact sur les points</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div id="cahier-delta-preview" style="font-size:1.3rem;font-weight:800;font-family:'JetBrains Mono',monospace;
+              color:var(--green);">+2</div>
+            <div style="font-size:.8rem;color:var(--muted);" id="cahier-delta-expl"></div>
+          </div>
+        </div>
+      </div>
+      <div style="color:var(--muted);font-size:.72rem;text-transform:uppercase;
+      letter-spacing:.05em;margin-bottom:8px;">Historique</div>
+      <div id="cahier-historique" style="max-height:160px;overflow-y:auto;margin-bottom:14px;"></div>
+      <div class="error-msg" id="cahier-err"></div>
+      <div class="success-msg" id="cahier-ok"></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('modal-cahier')">Fermer</button>
+        <button class="btn btn-success" onclick="saveCahier()">💾 Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ZOOM PHOTO ═══ -->
+  <div class="zoom-overlay" id="zoom-overlay" onclick="fermerZoom()">
+    <div class="zoom-close">✕</div>
+    <img id="zoom-img" src="" alt="">
+    <div class="zoom-name" id="zoom-name"></div>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════
+    // ÉTAT GLOBAL
+    // ═══════════════════════════════════════════════════════════
+    let currentClassId = null;
+    let allClasses = [];
+    let currentView = 'table';
+    let currentStudents = [];
+    let cardOrder = {};
+    let currentRemarqueId = null;
+    let tousLesLiens = [];
+    let csvFile = null;
+
+    // ═══════════════════════════════════════════════════════════
+    // HELPERS
+    // ═══════════════════════════════════════════════════════════
+    async function api(method, url, body) {
+      const opts = {
+        method, credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      };
+      if (body !== undefined) opts.body = JSON.stringify(body);
+      try {
+        const r = await fetch(url, opts);
+        return await r.json();
+      } catch (e) { return { error: 'Erreur réseau : ' + e.message }; }
+    }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function esc(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function fmtDate(d) {
+      if (!d) return '—';
+      try {
+        return new Date(d).toLocaleDateString('fr-FR',
+          { day: '2-digit', month: 'short', year: 'numeric' });
+      }
+      catch (e) { return d; }
+    }
+    document.querySelectorAll('.modal-overlay').forEach(o => {
+      o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // AUTH
+    // ═══════════════════════════════════════════════════════════
+    async function login() {
+      const email = document.getElementById('t-email').value;
+      const pass = document.getElementById('t-pass').value;
+      const r = await api('POST', '/api/auth/login-teacher', { email, mot_de_passe: pass });
+      if (r.success) {
+        document.getElementById('login-err').textContent = '';
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-dashboard').classList.add('active');
+        loadAll();
+      } else {
+        document.getElementById('login-err').textContent = r.error || 'Erreur de connexion.';
+      }
+    }
+    async function logout() {
+      await api('POST', '/api/auth/logout');
+      currentClassId = null;
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-login').classList.add('active');
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // DASHBOARD
+    // ═══════════════════════════════════════════════════════════
+    async function loadAll() {
+      await loadClasses();
+      await loadStudents();
+      refreshBadges();
+    }
+    async function loadClasses() {
+      const data = await api('GET', '/api/classes');
+      if (!data || data.error) return;
+      allClasses = data;
+      const total = allClasses.reduce((a, c) => a + (c.nb_eleves || 0), 0);
+      let html = `<div class="class-item ${currentClassId === null ? 'active' : ''}"
+    onclick="selectClass(null,'Toutes les classes')">
+    Toutes les classes<br>
+    <span class="class-count">${total} élèves</span></div>`;
+      allClasses.forEach(c => {
+        html += `<div class="class-item ${currentClassId == c.id ? 'active' : ''}"
+      onclick="selectClass(${c.id},'${esc(c.nom)}')">
+      ${esc(c.nom)}<br>
+      <span class="class-count">${c.nb_eleves || 0} élèves · moy. ${c.moyenne || '—'}</span>
+    </div>`;
+      });
+      document.getElementById('classes-list').innerHTML = html;
+    }
+    function selectClass(id, nom) {
+      currentClassId = id;
+      document.getElementById('class-title').textContent = nom;
+      loadAll();
+    }
+    async function loadStudents() {
+      const q = document.getElementById('search-input')?.value || '';
+      let url = '/api/eleves?';
+      if (currentClassId) url += `classe_id=${currentClassId}&`;
+      if (q) url += `search=${encodeURIComponent(q)}`;
+      const students = await api('GET', url);
+      if (!students || students.error) return;
+      currentStudents = students;
+      renderStats(students);
+      if (currentView === 'cards') {
+        renderCards(students);
+      } else {
+        renderTable(students);
+      }
+    }
+    function renderStats(students) {
+      const bar = document.getElementById('stats-bar');
+      if (!students.length) { bar.innerHTML = ''; return; }
+      const pts = students.map(s => parseFloat(s.points) || 0);
+      const avg = (pts.reduce((a, b) => a + b, 0) / pts.length).toFixed(1);
+      const good = pts.filter(p => p >= 16).length;
+      const bad = pts.filter(p => p < 10).length;
+      bar.innerHTML = `
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent)">${students.length}</div>
+      <div class="stat-lbl">Élèves</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--yellow)">${avg}</div>
+      <div class="stat-lbl">Moyenne</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--green)">${good}</div>
+      <div class="stat-lbl">≥ 16 pts</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--red)">${bad}</div>
+      <div class="stat-lbl">< 10 pts</div></div>`;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // VUE TABLEAU
+    // ═══════════════════════════════════════════════════════════
+    function renderTable(students) {
+      const wrap = document.getElementById('table-wrap');
+      if (!students.length) {
+        wrap.innerHTML = `<p style="color:var(--muted);text-align:center;padding:40px;">
+      Aucun élève. Importez un fichier CSV.</p>`;
+        return;
+      }
+      wrap.innerHTML = `
+    <table>
+      <thead><tr>
+        <th>#</th><th>N°</th><th>Nom & Prénom</th>
+        <th>Massar</th><th>Classe</th><th>Points</th>
+        <th>Ajuster</th><th>Actions</th>
+      </tr></thead>
+      <tbody>${students.map((s, i) => {
+        const pts = parseFloat(s.points) || 0;
+        const cls = pts >= 16 ? 'score-high' : pts >= 10 ? 'score-mid' : 'score-low';
+        const init = ((s.prenom || '')[0] || '').toUpperCase()
+          + ((s.nom || '')[0] || '').toUpperCase();
+        return `<tr>
+          <td style="color:var(--muted)">${i + 1}</td>
+          <td><span style="font-family:'JetBrains Mono',monospace">${s.numero_classe}</span></td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:30px;height:30px;border-radius:50%;flex-shrink:0;
+                background:linear-gradient(135deg,var(--accent),var(--accent2));
+                display:flex;align-items:center;justify-content:center;
+                font-size:.7rem;font-weight:700;overflow:hidden;position:relative;">
+                ${s.photo ? `<img src="${s.photo}"
+                  style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;">` : init}
+              </div>
+              <strong>${esc(s.nom)}</strong>&nbsp;${esc(s.prenom)}
+            </div>
+          </td>
+          <td style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:.76rem;">
+            ${esc(s.massar)}</td>
+          <td>${esc(s.classe_nom)}</td>
+          <td><span class="score-badge ${cls}">${pts}</span></td>
+          <td>
+            <div class="pts-ctrl">
+              <button class="pts-btn pts-sub" onclick="ajuster(${s.id},-1)">−</button>
+              <input class="pts-input" type="number" id="n-${s.id}" value="1" min="1" max="20">
+              <button class="pts-btn pts-add" onclick="ajusterN(${s.id},1)">+N</button>
+              <button class="pts-btn pts-sub" onclick="ajusterN(${s.id},-1)">−N</button>
+            </div>
+          </td>
+          <td>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <button class="btn-tbl"
+                onclick="openRemarque(${s.id}, this.dataset.nom)"
+                data-nom="${esc(s.prenom)} ${esc(s.nom)}">✏️ Note</button>
+              <button class="btn-tbl"
+                onclick="openCahierEleve(${s.id}, this.dataset.nom)"
+                data-nom="${esc(s.prenom)} ${esc(s.nom)}">📓 Cahier</button>
+              <button class="btn-tbl" onclick="openEdit(${s.id})">🖊️ Éditer</button>
+              <button class="btn-tbl"
+                style="${s.suspect_triche ? 'background:var(--red);color:white;border-color:var(--red);' : ''}"
+                title="${s.suspect_triche ? 'Suspect de triche — cliquer pour retirer' : 'Marquer comme suspect de triche'}"
+                onclick="toggleSuspect(${s.id}, ${s.suspect_triche ? 0 : 1})">
+                🚩${s.suspect_triche ? ' Suspect' : ''}
+              </button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // VUE CARTES + DRAG & DROP
+    // ═══════════════════════════════════════════════════════════
+    function setView(view) {
+      currentView = view;
+      document.getElementById('btn-view-table').classList.toggle('active', view === 'table');
+      document.getElementById('btn-view-cards').classList.toggle('active', view === 'cards');
+      if (view === 'table') renderTable(currentStudents);
+      else renderCards(currentStudents);
+    }
+    function getClasseKey() {
+      return currentClassId ? 'classe_' + currentClassId : 'all';
+    }
+    function chargerOrdre() {
+      try { cardOrder = JSON.parse(localStorage.getItem('gesticlasse_ordre') || '{}'); }
+      catch (e) { cardOrder = {}; }
+    }
+    function sauvegarderOrdre() {
+      try { localStorage.setItem('gesticlasse_ordre', JSON.stringify(cardOrder)); }
+      catch (e) { }
+    }
+    function appliquerOrdre(students) {
+      const key = getClasseKey();
+      const ordre = cardOrder[key];
+      if (!ordre || !ordre.length) return students;
+      const map = {};
+      students.forEach(s => map[s.id] = s);
+      const result = [];
+      ordre.forEach(id => {
+        if (String(id).startsWith('vide_')) {
+          result.push({ id: id, _vide: true }); // case vide
+        } else if (map[id]) {
+          result.push(map[id]);
+        }
+      });
+      // Ajouter les élèves pas encore dans l'ordre
+      students.forEach(s => {
+        if (!ordre.includes(s.id) && !ordre.includes(String(s.id)))
+          result.push(s);
+      });
+      return result;
+    }
+    function renderCards(students) {
+      const wrap = document.getElementById('table-wrap');
+      if (!students.length) {
+        wrap.innerHTML = `<p style="color:var(--muted);text-align:center;padding:40px;">
+      Aucun élève. Importez un fichier CSV.</p>`;
+        return;
+      }
+      chargerOrdre();
+      wrap.innerHTML = '<div class="cards-grid" id="cards-grid"></div>';
+      const grid = document.getElementById('cards-grid');
+      appliquerOrdre(students).forEach(s => {
+         if (s._vide) {
+    const vide = creerCaseVide(s.id, grid);
+    grid.appendChild(vide);
+    return;
+  }
+        const pts = parseFloat(s.points) || 0;
+        const col = pts >= 16 ? 'var(--green)' : pts >= 10 ? 'var(--yellow)' : 'var(--red)';
+        const init = ((s.prenom || '')[0] || '?').toUpperCase()
+          + ((s.nom || '')[0] || '?').toUpperCase();
+        const card = document.createElement('div');
+        card.className = 'student-card';
+        card.dataset.id = s.id;
+        card.draggable = true;
+        card.innerHTML = `
+      <div class="card-num">${s.numero_classe}</div>
+      <div class="card-avatar" data-photo="${s.photo || ''}"
+        data-nom="${esc(s.prenom)} ${esc(s.nom)}"
+        onclick="zoomPhoto(this.dataset.photo, this.dataset.nom)">
+        ${s.photo ? `<img src="${s.photo}">` : init}
+        <div class="card-avatar-zoom">🔍</div>
+      </div>
+      <div class="card-name">${esc(s.nom)}</div>
+      <div class="card-prenom">${esc(s.prenom)}</div>
+      <div class="card-score" style="color:${col}">${pts}/20</div>
+      <div class="card-actions">
+  <button class="card-btn" onclick="ajuster(${s.id},-1)" title="-1">−</button>
+  <button class="card-btn" onclick="ajuster(${s.id},+1)" title="+1">+</button>
+  <button class="card-btn"
+    onclick="openRemarque(${s.id}, this.dataset.nom)"
+    data-nom="${esc(s.prenom)} ${esc(s.nom)}" title="Note">✏️</button>
+  <button class="card-btn"
+    onclick="openCahierEleve(${s.id}, this.dataset.nom)"
+    data-nom="${esc(s.prenom)} ${esc(s.nom)}" title="Cahier">📓</button>
+  <button class="card-btn" onclick="openEdit(${s.id})" title="Éditer">🖊️</button>
+</div>`;
+        // Drag & Drop
+        card.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('text/plain', String(s.id));
+          setTimeout(() => card.classList.add('dragging'), 0);
+        });
+        card.addEventListener('dragend', () => {
+          card.classList.remove('dragging');
+          const key = getClasseKey();
+          cardOrder[key] = [...document.querySelectorAll('.student-card')]
+            .map(c => parseInt(c.dataset.id));
+          sauvegarderOrdre();
+        });
+        card.addEventListener('dragover', e => {
+          e.preventDefault(); card.classList.add('drag-over');
+        });
+        card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+        card.addEventListener('drop', e => {
+          e.preventDefault(); card.classList.remove('drag-over');
+          const dragged = document.querySelector(
+            `.student-card[data-id="${e.dataTransfer.getData('text/plain')}"]`);
+          if (dragged && dragged !== card) {
+            const cards = [...grid.querySelectorAll('.student-card')];
+            const dragIdx = cards.indexOf(dragged);
+            const dropIdx = cards.indexOf(card);
+            grid.insertBefore(dragged, dragIdx < dropIdx ? card.nextSibling : card);
+          }
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    function creerCaseVide(id, grid) {
+  const vide      = document.createElement('div');
+  vide.className  = 'student-card';
+  vide.dataset.id = id;
+  vide.draggable  = true;
+  vide.style.opacity = '0.25';
+  vide.innerHTML  = `
+    <div style="height:70px;display:flex;align-items:center;
+      justify-content:center;color:var(--muted);font-size:1.4rem;">⬜</div>
+    <div style="font-size:.65rem;color:var(--muted);margin-top:4px;">vide</div>
+    <button class="card-btn" style="margin-top:6px;"
+      onclick="this.closest('.student-card').remove();
+               sauvegarderOrdreAvecVides()">✕</button>`;
+  ajouterDragDrop(vide, grid);
+  return vide;
+}
+    // ═══════════════════════════════════════════════════════════
+    // ZOOM PHOTO
+    // ═══════════════════════════════════════════════════════════
+    function zoomPhoto(src, nom) {
+      if (!src) return;
+      document.getElementById('zoom-img').src = src;
+      document.getElementById('zoom-name').textContent = nom;
+      document.getElementById('zoom-overlay').classList.add('open');
+    }
+    function fermerZoom() {
+      document.getElementById('zoom-overlay').classList.remove('open');
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') fermerZoom(); });
+
+    // ═══════════════════════════════════════════════════════════
+    // POINTS
+    // ═══════════════════════════════════════════════════════════
+    async function ajuster(id, delta) {
+      await api('PATCH', `/api/eleves/${id}/points`, { delta });
+      loadStudents(); loadClasses();
+    }
+    async function ajusterN(id, sign) {
+      const n = parseInt(document.getElementById(`n-${id}`)?.value) || 1;
+      await ajuster(id, sign * n);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // REMARQUES
+    // ═══════════════════════════════════════════════════════════
+    async function openRemarque(id, nom) {
+      currentRemarqueId = id;
+      document.getElementById('remark-nom').textContent = nom;
+      document.getElementById('remark-text').value = '';
+      openModal('modal-remark');
+      await chargerRemarques(id);
+    }
+    async function chargerRemarques(id) {
+      const e = await api('GET', `/api/eleves/${id}`);
+      const div = document.getElementById('remark-list');
+      if (!e || e.error || !e.remarques || !e.remarques.length) {
+        div.innerHTML = `<p style="color:var(--muted);font-size:.8rem;font-style:italic;
+      text-align:center;padding:10px;">Aucune remarque pour le moment.</p>`;
+        return;
+      }
+      div.innerHTML = e.remarques.map(r => `
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
+      background:var(--bg);border-radius:8px;margin-bottom:7px;
+      border-left:3px solid var(--accent2);">
+      <div style="flex:1;">
+        <div style="font-size:.84rem;">${esc(r.texte)}</div>
+        <div style="color:var(--muted);font-size:.7rem;margin-top:3px;">${fmtDate(r.created_at)}</div>
+      </div>
+      <button onclick="supprimerRemarque(${id},${r.id})"
+        style="background:transparent;border:none;cursor:pointer;
+          color:var(--red);font-size:1rem;padding:2px 4px;flex-shrink:0;"
+        title="Supprimer">🗑️</button>
+    </div>`).join('');
+    }
+    async function supprimerRemarque(eleveId, remarqueId) {
+      if (!confirm('Supprimer cette remarque ?')) return;
+      const r = await api('DELETE', `/api/eleves/${eleveId}/remarques/${remarqueId}`);
+      if (r.success) { await chargerRemarques(eleveId); loadStudents(); }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // FLAG SUSPECT DE TRICHE (utilisé par GestiTest pour ajuster la correction IA)
+    // ═══════════════════════════════════════════════════════════
+    async function toggleSuspect(id, value) {
+      const msg = value
+        ? 'Marquer cet élève comme suspect de triche ?\n\nCela rendra la correction automatique plus stricte sur ses prochaines copies GestiTest.'
+        : 'Retirer le statut de suspect pour cet élève ?';
+      if (!confirm(msg)) return;
+      const r = await api('PATCH', `/api/eleves/${id}/suspect`, { suspect_triche: value });
+      if (r && r.success) loadStudents();
+    }
+    async function saveRemark() {
+      const texte = document.getElementById('remark-text').value.trim();
+      if (!texte) return;
+      await api('POST', `/api/eleves/${currentRemarqueId}/remarques`, { texte });
+      document.getElementById('remark-text').value = '';
+      await chargerRemarques(currentRemarqueId);
+      loadStudents();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // ÉDITION ÉLÈVE
+    // ═══════════════════════════════════════════════════════════
+    async function openEdit(id) {
+      const e = await api('GET', `/api/eleves/${id}`);
+      if (!e || e.error) return;
+      document.getElementById('edit-id').value = e.id;
+      document.getElementById('edit-nom').value = e.nom;
+      document.getElementById('edit-prenom').value = e.prenom;
+      document.getElementById('edit-num').value = e.numero_classe;
+      document.getElementById('edit-massar').value = e.massar;
+      document.getElementById('edit-dob').value = (e.date_naissance || '').split('T')[0];
+      document.getElementById('edit-err').textContent = '';
+      document.getElementById('edit-ok').textContent = '';
+      const sel = document.getElementById('edit-classe');
+      for (let o of sel.options) {
+        if (o.value === e.classe_nom) { o.selected = true; break; }
+      }
+      const av = document.getElementById('edit-avatar');
+      av.dataset.eleveId = e.id;
+      if (e.photo) {
+        av.innerHTML = `<img src="${e.photo}"
+      style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;">`;
+      } else {
+        const init = ((e.prenom || '')[0] || '?').toUpperCase()
+          + ((e.nom || '')[0] || '?').toUpperCase();
+        av.textContent = init;
+      }
+      openModal('modal-edit');
+    }
+    async function saveEdit() {
+      const id = document.getElementById('edit-id').value;
+      const classeNom = document.getElementById('edit-classe').value;
+      const cls = allClasses.find(c => c.nom === classeNom);
+      if (!cls) { document.getElementById('edit-err').textContent = 'Classe introuvable.'; return; }
+      const r = await api('PUT', `/api/modifications/admin/${id}`, {
+        nom: document.getElementById('edit-nom').value.trim().toUpperCase(),
+        prenom: document.getElementById('edit-prenom').value.trim(),
+        classe_id: cls.id,
+        numero_classe: parseInt(document.getElementById('edit-num').value),
+        massar: document.getElementById('edit-massar').value.trim().toUpperCase(),
+        date_naissance: document.getElementById('edit-dob').value,
+      });
+      if (r.success) {
+        document.getElementById('edit-ok').textContent = '✅ Profil mis à jour !';
+        document.getElementById('edit-err').textContent = '';
+        loadAll();
+      } else {
+        document.getElementById('edit-err').textContent = r.error || 'Erreur.';
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // PHOTO ADMIN
+    // ═══════════════════════════════════════════════════════════
+    function changerPhotoAdmin(event) {
+      const file = event.target.files[0];
+      event.target.value = '';
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        document.getElementById('edit-err').textContent = 'Image trop grande (max 2 Mo).';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = async ev => {
+        const photo_data = ev.target.result;
+        const eleve_id = document.getElementById('edit-id').value;
+        const r = await api('POST', `/api/photos/admin/${eleve_id}`, { photo_data });
+        if (r.success) {
+          const av = document.getElementById('edit-avatar');
+          av.innerHTML = `<img src="${photo_data}"
+        style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;">`;
+          document.getElementById('edit-ok').textContent = '✅ Photo mise à jour !';
+          document.getElementById('edit-err').textContent = '';
+          loadStudents(); refreshBadges();
+        } else {
+          document.getElementById('edit-err').textContent = r.error || 'Erreur upload.';
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    async function supprimerPhotoAdmin() {
+      const eleve_id = document.getElementById('edit-id').value;
+      if (!eleve_id) return;
+      const r = await api('DELETE', `/api/photos/admin/${eleve_id}`);
+      if (r.success) {
+        const av = document.getElementById('edit-avatar');
+        av.textContent = '?';
+        document.getElementById('edit-ok').textContent = '✅ Photo supprimée.';
+        document.getElementById('edit-err').textContent = '';
+        loadStudents(); refreshBadges();
+      } else {
+        document.getElementById('edit-err').textContent = r.error || 'Erreur suppression.';
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // IMPORT / EXPORT CSV
+    // ═══════════════════════════════════════════════════════════
+    function openImport() {
+      csvFile = null;
+      document.getElementById('csv-filename').textContent = '';
+      document.getElementById('import-preview').style.display = 'none';
+      document.getElementById('btn-import').disabled = true;
+      document.getElementById('import-msg').textContent = '';
+      openModal('modal-import');
+    }
+    function previewCSV(e) {
+      csvFile = e.target.files[0];
+      if (!csvFile) return;
+      document.getElementById('csv-filename').textContent = csvFile.name;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const lines = ev.target.result.trim().split('\n').slice(0, 6);
+        const prev = document.getElementById('import-preview');
+        prev.textContent = lines.join('\n');
+        prev.style.display = 'block';
+        document.getElementById('btn-import').disabled = false;
+      };
+      reader.readAsText(csvFile, 'UTF-8');
+    }
+    async function doImport() {
+      if (!csvFile) return;
+      const fd = new FormData();
+      fd.append('fichier', csvFile);
+      const r = await fetch('/api/eleves/import',
+        { method: 'POST', credentials: 'include', body: fd }).then(r => r.json());
+      const msg = document.getElementById('import-msg');
+      if (r.success) {
+        msg.style.color = 'var(--green)';
+        msg.textContent = `✅ ${r.imported} élèves importés.`
+          + (r.errors?.length ? ` (${r.errors.length} erreurs)` : '');
+        document.getElementById('btn-import').disabled = true;
+        loadAll();
+      } else {
+        msg.style.color = 'var(--red)';
+        msg.textContent = r.error || 'Erreur import.';
+      }
+    }
+    function exportCSV() {
+      let url = '/api/eleves/export/csv';
+      if (currentClassId) url += `?classe_id=${currentClassId}`;
+      window.location.href = url;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // MOT DE PASSE
+    // ═══════════════════════════════════════════════════════════
+    function openPass() {
+      document.getElementById('pass-err').textContent = '';
+      document.getElementById('pass-ok').textContent = '';
+      openModal('modal-pass');
+    }
+    async function savePass() {
+      const p1 = document.getElementById('new-pass1').value;
+      const p2 = document.getElementById('new-pass2').value;
+      if (p1.length < 6) { document.getElementById('pass-err').textContent = 'Minimum 6 caractères.'; return; }
+      if (p1 !== p2) { document.getElementById('pass-err').textContent = 'Mots de passe différents.'; return; }
+      const r = await api('PUT', '/api/auth/change-password', { nouveau_mot_de_passe: p1 });
+      if (r.success) {
+        document.getElementById('pass-ok').textContent = '✅ Modifié !';
+        document.getElementById('pass-err').textContent = '';
+      } else {
+        document.getElementById('pass-err').textContent = r.error || 'Erreur.';
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // PHOTOS EN ATTENTE
+    // ═══════════════════════════════════════════════════════════
+    async function openPhotos() { openModal('modal-photos'); await chargerPhotos(); }
+    async function chargerPhotos() {
+      const photos = await api('GET', '/api/photos/pending');
+      const div = document.getElementById('photos-list');
+      if (!photos || photos.error || !photos.length) {
+        div.innerHTML = `<p style="color:var(--muted);text-align:center;padding:24px;">
+      Aucune photo en attente.</p>`;
+        return;
+      }
+      div.innerHTML = photos.map(p => {
+        const init = ((p.prenom || '')[0] || '').toUpperCase()
+          + ((p.nom || '')[0] || '').toUpperCase();
+        return `
+      <div class="pending-item">
+        <div style="text-align:center;flex-shrink:0;">
+          <div style="font-size:.66rem;color:var(--muted);margin-bottom:4px;">Actuelle</div>
+          <div class="avatar-sm">${p.photo_actuelle
+            ? `<img src="${p.photo_actuelle}">` : init}</div>
+        </div>
+        <div style="color:var(--muted);font-size:1.3rem;flex-shrink:0;">→</div>
+        <div style="text-align:center;flex-shrink:0;">
+          <div style="font-size:.66rem;color:var(--yellow);margin-bottom:4px;">Nouvelle</div>
+          <div class="avatar-sm" style="border:2px solid var(--yellow);">
+            <img src="${p.photo_data}"></div>
+        </div>
+        <div style="flex:1;min-width:130px;">
+          <div style="font-weight:700;font-size:.88rem;">${esc(p.prenom)} ${esc(p.nom)}</div>
+          <div style="color:var(--muted);font-size:.76rem;margin-top:3px;">${esc(p.classe_nom)}</div>
+          <div style="color:var(--muted);font-size:.7rem;margin-top:2px;">${fmtDate(p.submitted_at)}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <button class="btn btn-success" onclick="validerPhoto(${p.id})">✅ Valider</button>
+          <button class="btn btn-danger"  onclick="refuserPhoto(${p.id})">❌ Refuser</button>
+        </div>
+      </div>`;
+      }).join('');
+    }
+    async function validerPhoto(id) {
+      await api('POST', `/api/photos/${id}/approve`);
+      chargerPhotos(); refreshBadges(); loadStudents();
+    }
+    async function refuserPhoto(id) {
+      await api('POST', `/api/photos/${id}/reject`);
+      chargerPhotos(); refreshBadges();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // MODIFICATIONS EN ATTENTE
+    // ═══════════════════════════════════════════════════════════
+    async function openModifs() { openModal('modal-modifs'); await chargerModifs(); }
+    async function chargerModifs() {
+      const modifs = await api('GET', '/api/modifications/pending');
+      const div = document.getElementById('modifs-list');
+      if (!modifs || modifs.error || !modifs.length) {
+        div.innerHTML = `<p style="color:var(--muted);text-align:center;padding:24px;">
+      Aucune demande en attente.</p>`;
+        return;
+      }
+      const labels = {
+        classe_id: 'classe', nom: 'nom', prenom: 'prénom',
+        numero_classe: 'N° en classe', massar: 'N° Massar', date_naissance: 'date de naissance'
+      };
+      div.innerHTML = modifs.map(m => `
+    <div class="pending-item">
+      <div style="flex:1;min-width:190px;">
+        <div style="font-weight:700;font-size:.88rem;">${esc(m.prenom)} ${esc(m.nom)}
+          <span style="color:var(--muted);font-weight:400;font-size:.76rem;">
+            — ${esc(m.classe_nom)}</span></div>
+        <div style="font-size:.8rem;margin-top:5px;">
+          Changer <strong>${labels[m.champ] || m.champ}</strong> :
+          <span style="color:var(--red);">${esc(m.ancienne_val)}</span>
+          → <span style="color:var(--green);">${esc(m.nouvelle_val)}</span>
+        </div>
+        <div style="color:var(--muted);font-size:.7rem;margin-top:2px;">${fmtDate(m.submitted_at)}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button class="btn btn-success" onclick="validerModif(${m.id})">✅ Valider</button>
+        <button class="btn btn-danger"  onclick="refuserModif(${m.id})">❌ Refuser</button>
+      </div>
+    </div>`).join('');
+    }
+    async function validerModif(id) {
+      await api('POST', `/api/modifications/${id}/approve`);
+      chargerModifs(); refreshBadges(); loadAll();
+    }
+    async function refuserModif(id) {
+      await api('POST', `/api/modifications/${id}/reject`);
+      chargerModifs(); refreshBadges();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // BADGES
+    // ═══════════════════════════════════════════════════════════
+    async function refreshBadges() {
+      const [photos, modifs] = await Promise.all([
+        api('GET', '/api/photos/pending'),
+        api('GET', '/api/modifications/pending')
+      ]);
+      const bp = document.getElementById('badge-photos');
+      const bm = document.getElementById('badge-modifs');
+      const nbP = (!photos || photos.error) ? 0 : photos.length;
+      const nbM = (!modifs || modifs.error) ? 0 : modifs.length;
+      bp.textContent = nbP; bp.style.display = nbP > 0 ? 'inline' : 'none';
+      bm.textContent = nbM; bm.style.display = nbM > 0 ? 'inline' : 'none';
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // LIENS ÉLÈVES
+    // ═══════════════════════════════════════════════════════════
+    async function openLiens() { openModal('modal-liens'); await chargerLiens(); }
+    async function chargerLiens() {
+      tousLesLiens = await api('GET', '/api/auth/liens-eleves');
+      if (!tousLesLiens || tousLesLiens.error) {
+        document.getElementById('liens-list').innerHTML =
+          `<p style="color:var(--muted);text-align:center;padding:16px;">
+        Aucun lien. Cliquez sur "Générer les liens".</p>`;
+        tousLesLiens = []; return;
+      }
+      afficherLiens(tousLesLiens);
+    }
+    function afficherLiens(liens) {
+      const base = window.location.origin;
+      const div = document.getElementById('liens-list');
+      if (!liens.length) {
+        div.innerHTML = `<p style="color:var(--muted);text-align:center;padding:16px;">
+      Aucun lien trouvé.</p>`;
+        return;
+      }
+      div.innerHTML = liens.map(l => `
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;
+      background:var(--bg);border-radius:10px;margin-bottom:6px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:150px;">
+        <div style="font-weight:600;font-size:.84rem;">${esc(l.prenom)} ${esc(l.nom)}
+          <span style="color:var(--accent);font-size:.73rem;margin-left:5px;">${esc(l.classe_nom)}</span>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.66rem;
+          color:var(--muted);margin-top:2px;word-break:break-all;">
+          ${base}/acces/${l.token}</div>
+      </div>
+      <button class="btn-tbl" onclick="copierLien('${base}/acces/${l.token}',this)">📋 Copier</button>
+    </div>`).join('');
+    }
+    function filtrerLiens() {
+      const q = document.getElementById('search-lien').value.toLowerCase();
+      afficherLiens(tousLesLiens.filter(l =>
+        (l.nom + l.prenom + l.classe_nom).toLowerCase().includes(q)));
+    }
+    async function genererTokens() {
+      const r = await api('POST', '/api/auth/generer-tokens', {});
+      if (r.success) { alert(`✅ ${r.generes} liens générés !`); await chargerLiens(); }
+      else { alert('Erreur : ' + (r.error || 'inconnue')); }
+    }
+    function copierLien(url, btn) {
+      navigator.clipboard.writeText(url).then(() => {
+        btn.textContent = '✅ Copié !';
+        setTimeout(() => btn.textContent = '📋 Copier', 2000);
+      });
+    }
+    function exporterLiens() {
+      const base = window.location.origin;
+      const rows = ['nom;prenom;classe;lien'];
+      tousLesLiens.forEach(l =>
+        rows.push(`${l.nom};${l.prenom};${l.classe_nom};${base}/acces/${l.token}`));
+      const blob = new Blob(['\ufeff' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'liens_eleves.csv';
+      a.click();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // CAHIER
+    // ═══════════════════════════════════════════════════════════
+    function calculerDeltaCahier(exercices, proprete) {
+      let delta = 0;
+      if (exercices === 'oui') delta += 1;
+      else if (exercices === 'non') delta -= 1;
+      if (proprete === 'excellent') delta += 1;
+      else if (proprete === 'moyen') delta -= 0.5;
+      else if (proprete === 'insuffisant') delta -= 1;
+      return delta;
+    }
+    function majDeltaPreview() {
+      const exercices = document.getElementById('cahier-exercices').value;
+      const proprete = document.getElementById('cahier-proprete').value;
+      const delta = calculerDeltaCahier(exercices, proprete);
+      const el = document.getElementById('cahier-delta-preview');
+      const expl = document.getElementById('cahier-delta-expl');
+      el.textContent = (delta >= 0 ? '+' : '') + delta;
+      el.style.color = delta > 0 ? 'var(--green)' : delta < 0 ? 'var(--red)' : 'var(--muted)';
+      const msgs = [];
+      if (exercices === 'oui') msgs.push('exercices faits (+1)');
+      else if (exercices === 'non') msgs.push('exercices non faits (-1)');
+      if (proprete === 'excellent') msgs.push('présentation excellente (+1)');
+      else if (proprete === 'moyen') msgs.push('présentation moyenne (-0.5)');
+      else if (proprete === 'insuffisant') msgs.push('présentation insuffisante (-1)');
+      expl.textContent = msgs.length ? msgs.join(', ') : 'Aucun impact sur les points';
+    }
+    function openCahier() {
+      alert("Cliquez sur le bouton 📓 Cahier dans la ligne d'un élève pour saisir son suivi.");
+    }
+    async function openCahierEleve(id, nom) {
+      document.getElementById('cahier-eleve-id').value = id;
+      document.getElementById('cahier-nom').textContent = nom;
+      document.getElementById('cahier-date').value =
+        new Date().toISOString().split('T')[0];
+      document.getElementById('cahier-exercices').value = 'oui';
+      document.getElementById('cahier-proprete').value = 'excellent';
+      document.getElementById('cahier-err').textContent = '';
+      document.getElementById('cahier-ok').textContent = '';
+      majDeltaPreview();
+      const data = await api('GET', `/api/cahier/${id}`);
+      const div = document.getElementById('cahier-historique');
+      if (!data || data.error || !data.length) {
+        div.innerHTML = `<p style="color:var(--muted);font-size:.8rem;font-style:italic;
+      text-align:center;padding:8px;">Aucune vérification enregistrée.</p>`;
+      } else {
+        div.innerHTML = data.map(v => {
+          const exIco = v.exercices === 'oui' ? '✅' : v.exercices === 'partiel' ? '⚠️' : '❌';
+          const prIco = v.proprete === 'excellent' ? '⭐⭐⭐'
+            : v.proprete === 'bien' ? '⭐⭐' : v.proprete === 'moyen' ? '⭐' : '❌';
+          const delta = parseFloat(v.delta_points);
+          const dStr = (delta >= 0 ? '+' : '') + delta;
+          const dCol = delta > 0 ? 'var(--green)' : delta < 0 ? 'var(--red)' : 'var(--muted)';
+          return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;
+        background:var(--bg);border-radius:8px;margin-bottom:6px;font-size:.8rem;">
+        <div style="color:var(--muted);min-width:80px;">${fmtDate(v.date_verification)}</div>
+        <div style="flex:1;">${exIco} Exos &nbsp;${prIco} Préso &nbsp;📄 ${v.pages_completes || 0}p</div>
+        <div style="font-weight:700;color:${dCol};font-family:'JetBrains Mono',monospace;">
+          ${dStr}</div></div>`;
+        }).join('');
+      }
+      openModal('modal-cahier');
+    }
+    async function saveCahier() {
+      const eleve_id = document.getElementById('cahier-eleve-id').value;
+      const date = document.getElementById('cahier-date').value;
+      const exercices = document.getElementById('cahier-exercices').value;
+      const pages = parseInt(document.getElementById('cahier-pages').value) || 0;
+      const proprete = document.getElementById('cahier-proprete').value;
+      const delta_points = calculerDeltaCahier(exercices, proprete);
+      if (!date) { document.getElementById('cahier-err').textContent = 'Veuillez saisir une date.'; return; }
+      document.getElementById('cahier-err').textContent = '';
+      document.getElementById('cahier-ok').textContent = '';
+      const r = await api('POST', `/api/cahier/${eleve_id}`, {
+        date_verification: date, exercices, pages_completes: pages, proprete, delta_points
+      });
+      if (r.success) {
+        document.getElementById('cahier-ok').textContent =
+          `✅ Enregistré — points ${delta_points >= 0 ? '+' : ''}${delta_points}`;
+        loadStudents();
+        await openCahierEleve(eleve_id, document.getElementById('cahier-nom').textContent);
+      } else {
+        document.getElementById('cahier-err').textContent = r.error || 'Erreur.';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      ['cahier-exercices', 'cahier-proprete'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', majDeltaPreview);
+      });
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // VÉRIFICATION SESSION AU CHARGEMENT
+    // ═══════════════════════════════════════════════════════════
+    (async () => {
+      const r = await api('GET', '/api/auth/verify');
+      if (r.connecte) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-dashboard').classList.add('active');
+        loadAll();
+      }
+    })();
+    function ajouterCaseVide() {
+      const grid = document.getElementById('cards-grid');
+      if (!grid) { alert("Passez en vue Cartes d'abord."); return; }
+      const vide = document.createElement('div');
+      vide.className = 'student-card';
+      vide.dataset.id = 'vide_' + Date.now();
+      vide.draggable = true;
+      vide.style.opacity = '0.25';
+      vide.style.cursor = 'grab';
+      vide.innerHTML = `
+    <div style="height:70px;display:flex;align-items:center;
+      justify-content:center;color:var(--muted);font-size:1.4rem;">⬜</div>
+    <div style="font-size:.65rem;color:var(--muted);margin-top:4px;">vide</div>
+    <button class="card-btn" style="margin-top:6px;"
+      onclick="this.closest('.student-card').remove();sauvegarderOrdreAvecVides()">✕</button>`;
+      // Drag & Drop identique aux vraies cartes
+      vide.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', vide.dataset.id);
+        setTimeout(() => vide.classList.add('dragging'), 0);
+      });
+      vide.addEventListener('dragend', () => {
+        vide.classList.remove('dragging');
+        sauvegarderOrdreAvecVides();
+      });
+      vide.addEventListener('dragover', e => {
+        e.preventDefault(); vide.classList.add('drag-over');
+      });
+      vide.addEventListener('dragleave', () => vide.classList.remove('drag-over'));
+      vide.addEventListener('drop', e => {
+        e.preventDefault(); vide.classList.remove('drag-over');
+        const draggedId = e.dataTransfer.getData('text/plain');
+        const dragged = document.querySelector(`.student-card[data-id="${draggedId}"]`);
+        if (dragged && dragged !== vide) {
+          const cards = [...grid.querySelectorAll('.student-card')];
+          const dragIdx = cards.indexOf(dragged);
+          const dropIdx = cards.indexOf(vide);
+          grid.insertBefore(dragged, dragIdx < dropIdx ? vide.nextSibling : vide);
+          sauvegarderOrdreAvecVides();
+        }
+      });
+      grid.appendChild(vide);
+      sauvegarderOrdreAvecVides();
+    }
+
+    function sauvegarderOrdreAvecVides() {
+      const key = getClasseKey();
+      sauvegarderOrdreAvecVides();
+    }
+  </script>
+</body>
+
+</html>
